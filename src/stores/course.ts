@@ -1,4 +1,5 @@
-import { ref, computed } from 'vue'
+import {ref, computed} from 'vue'
+import type { Ref } from 'vue'
 import { defineStore } from 'pinia'
 import {useMyCoursesStore} from "@/stores/myCourses";
 import {useAllCoursesStore} from "@/stores/allCourses";
@@ -11,8 +12,8 @@ export const useCourseStore = defineStore('course', () => {
     const myCoursesStore = useMyCoursesStore();
     const allCoursesStore = useAllCoursesStore();
 
-    const courseData = ref({});
-    const learningData = ref({});
+    const courseData:Ref<ICourse|{}> = ref({});
+    const learningData:Ref<ILearning|{}> = ref({});
 
     async function findCourseData(id: number) {
        courseData.value = await allCoursesStore.findCourse(id);
