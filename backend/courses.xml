@@ -1,0 +1,46 @@
+<profile>
+    <functions>
+        <getCourses desc="Получить список курсов" method="get" path="courses">
+
+            <param name="list_type" type="string" desc="Все курсы или мои" source="query" default="" />
+            <param name="name" type="string" source="query" desc="Дополнительные поля" default=""/>
+            <param name="status" type="string" source="query" desc="Статус" default=""/>
+            <param name="duration" type="number" source="query" desc="Продолжительность" default=""/>
+
+            <result type="text"/>
+
+            <lib function="getCourses">x-local://wtv/oapi/libs/courseApi.js</lib>
+
+            <tag name="dist" />
+
+        </getCourses>
+
+        <assignCourse desc="Назначить курс" method="post" path="courses" flags="SolidBody">
+
+            <param name="courseId" type="string" required="true" source="body" desc="ID курса"/>
+
+            <result type="json">
+                <property name="message" type="string"/>
+            </result>
+
+
+            <lib function="assignCourse">x-local://wtv/oapi/libs/courseApi.js</lib>
+
+            <tag name="dist" />
+
+        </assignCourse>
+
+        <getCourseUrl desc="Получить ссылку на открытие курса" method="get" path="courses">
+
+            <param name="course_id" type="string" desc="ID курса" source="query" default="" />
+            <param name="learning_id" type="string" source="query" desc="ID незаконченный курса" default=""/>
+
+            <result type="text"/>
+
+            <lib function="getCourseUrl">x-local://wtv/oapi/libs/courseApi.js</lib>
+
+            <tag name="dist" />
+
+        </getCourseUrl>
+    </functions>
+</profile>
