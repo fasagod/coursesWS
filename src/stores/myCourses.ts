@@ -1,22 +1,49 @@
-import { ref, computed } from 'vue'
+import {ref, computed} from 'vue'
+import type { Ref } from 'vue'
 import { defineStore } from 'pinia'
 
 const url = "http://localhost:80/oapi/courses"
 const xAppIdHeader = "7091583612230139493";
+const isDebug = false;
 
 export const useMyCoursesStore = defineStore('myCourses', () => {
 
-    const coursesList = ref([
-        {id: 1, name: "Vue 3", score: 100, status: "success"},
-        {id: 2, name: "Vite", score: 50, status: "process"},
-        {id: 3, name: "Nuxt 2", score: 21, status: "process"},
-        {id: 4, name: "Nuxt 3", score: 53, status: "process"},
-        {id: 5, name: "Nuxt 3 + Vite + ESLint", score: 0, status: "assigned"},
-        {id: 6, name: "Nuxt 2 + Vite + ESLint", score: 0, status: "assigned"},
-        {id: 7, name: "Nuxt 2 + Vite + ESLint", score: 0, status: "assigned"},
-    ])
+    const coursesList:Ref<ILearning[]|[]> = ref([]);
 
-    async function fetchMyCourses( courseName: string, status: string) {
+
+    async function fetchMyCourses( courseName?: string, status?: string): Promise<ILearning[]> {
+        if(isDebug){
+            return  [{
+                id: 0,
+                course_id: 1,
+                name: "Vue 3",
+                state_id: 1,
+                max_score: 100,
+                score: 100,
+                start_usage_date: "",
+                start_learning_date: "",
+                last_usage_date: "",
+                max_end_date:"",
+                time:0,
+                description: "",
+            },
+            {
+                id: 1,
+                course_id: 2,
+                name: "Vite",
+                state_id: 1,
+                max_score: 100,
+                score: 50,
+                start_usage_date: "",
+                start_learning_date: "",
+                last_usage_date: "",
+                max_end_date:"",
+                time:0,
+                description: "",
+            },
+            ]
+        }
+
         let type = 'my';
         courseName = courseName != undefined ? courseName : '';
         status = status != undefined ? status : '';
@@ -31,19 +58,28 @@ export const useMyCoursesStore = defineStore('myCourses', () => {
             .then((response) => response.json())
             .then((data) => {
                 coursesList.value = data;
+                return data;
         })
             .catch((error) => {
                 console.log(error)
         })
     }
 
-    function findCourse(id: number) {
-        return coursesList.value.find(course => course.id == id);
+    async function findCourse(id: number) {
+        await fetchMyCourses();
+        let res = coursesList.value.find(course => course.course_id == id);
+        console.log(res)
+
+        return res != undefined ? res : {};
     }
 
-    fetchMyCourses().then(() => {
-        console.log(coursesList.value)
-    });
+    if(coursesList.value.length == 0) {
+        fetchMyCourses().then(() => {
+            console.log(coursesList.value)
+        });
+    }
+
+
     return {
         coursesList, fetchMyCourses, findCourse
     }

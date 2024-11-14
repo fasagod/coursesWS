@@ -6,13 +6,13 @@ import { RouterLink, RouterView } from 'vue-router'
   <header>
     <div class="wrapper">
       <nav>
-        <RouterLink to="/">Мои курсы</RouterLink>
-        <RouterLink to="/courses">Все курсы</RouterLink>
+        <RouterLink to="/"><v-btn class="text-uppercase text-subtitle-2" rounded="lg" variant="plain">Мои курсы</v-btn></RouterLink>
+        <RouterLink to="/courses"><v-btn class="text-uppercase text-subtitle-2"  rounded="lg" variant="plain">Все курсы</v-btn></RouterLink>
       </nav>
     </div>
   </header>
   <main class="flex-grow-1">
-    <v-sheet class="pa-3 mt-4">
+    <v-sheet elevation="2" class="pa-3 mt-4">
 
     <RouterView />
 
@@ -27,11 +27,6 @@ header {
   max-height: 100vh;
 }
 
-.logo {
-  display: block;
-  margin: 0 auto 2rem;
-}
-
 nav {
   width: 100%;
   font-size: 12px;
@@ -40,16 +35,18 @@ nav {
 }
 
 nav a.router-link-exact-active {
-  color: var(--color-text);
+  color: black;
 }
 
-nav a.router-link-exact-active:hover {
-  background-color: transparent;
+nav a.router-link-active button{
+  border-radius: 15px;
+  background-color: #90b4f130;
 }
 
 nav a {
   display: inline-block;
-  padding: 0 1rem;
+  color: black;
+
 }
 
 nav a:first-of-type {
@@ -61,10 +58,6 @@ nav a:first-of-type {
     display: flex;
     padding-right: calc(var(--section-gap) / 2);
     flex-grow: 0;
-  }
-
-  .logo {
-    margin: 0 2rem 0 0;
   }
 
   header .wrapper {

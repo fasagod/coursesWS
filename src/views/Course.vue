@@ -1,45 +1,92 @@
 <script setup lang="ts">
 import {computed, onMounted} from "vue";
- import {useRoute} from "vue-router";
- import {useCourseStore} from "@/stores/course";
+import {useRoute} from "vue-router";
+import {useCourseStore} from "@/stores/course";
+import {useAllCoursesStore} from "@/stores/allCourses";
+import {useMyCoursesStore} from "@/stores/myCourses";
+import router from "@/router";
 
- const courseStore = useCourseStore();
- const route = useRoute()
 
- const courseId = computed(()=> Number(route.params.id));
+const allCoursesStore = useAllCoursesStore();
+const courseStore = useCourseStore();
+const myCoursesStore = useMyCoursesStore();
+const route = useRoute()
 
- const courseData  = computed(()=> courseStore.courseData);
+const courseId = computed(()=> route.params.id);
+const courseData  = computed(()=> courseStore.courseData);
+const learningData  = computed(()=> {
+  let data = courseStore.learningData
+  if(data.id) return courseStore.learningData
+  else return null;
+});
+console.log(courseId);
+const percent = computed(()=> {
+  if(learningData.value) return Math.floor((learningData.value.score/learningData.value.max_score) * 100)
+})
 
+function getDuration(param: number) {
+  if(param === 0) return "Без ограничения";
+  else return param + " дней";
+}
  function assignCourse(){
-   courseStore.assignCourse(courseId.value);
+   courseStore.assignCourse(courseId.value).then(() => {
+     UpdateInfo()
+   })
+
  }
- onMounted( ()=>{
-   courseStore.fetchCourse(courseId.value)
+ async function openCourse(courseId: string, learningId: string) {
+   const sUrl = await courseStore.fetchCourseUrl(courseId, learningId);
+   window.open(sUrl, "_blank");
+ }
+ function backToPage(){
+   if(router.getRoutes().length>0){
+     router.back();
+   }else {
+     router.push("/")
+   }
+ }
+
+ async function UpdateInfo() {
+   courseStore.findLearningData(courseId.value).then(()=>{
+     courseStore.findCourseData(courseId.value)
+   })
+ }
+ onMounted( async ()=>{
+  await UpdateInfo();
  })
 </script>
 
 <template>
+  <v-btn
+      class="text-none"
+      color="primary"
+      text="Назад"
+      variant="text"
+      @click="backToPage"
+      prepend-icon="md:arrow_back"
+  >
+  </v-btn>
   <div class="container w-75 ma-auto">
     <v-col v-if="courseId">
       <v-row>
         <v-col>
-          <h1>Name {{courseId}}</h1>
-          <p class="text-wrap">
-            {{courseData.desc}}
-            Lorem ipsum dolor sit amet, consectetur adipisicing elit. Aspernatur autem blanditiis commodi corporis cupiditate debitis dignissimos distinctio dolorum ea error, expedita facilis harum hic incidunt inventore iure magnam modi, nobis officiis placeat quas quidem quos rem repellat sapiente tempora totam voluptas!
+          <h1 class="text-h4 mb-4">{{courseData.name}}</h1>
+          <p class="" v-html="courseData.desc">
           </p>
         </v-col>
       </v-row>
       <v-row class="my-2">
         <v-col>
           <v-btn
+              v-if="learningData"
               class="text-none"
               color="primary"
-              text="Открыть"
+              text="Открыть курс"
               variant="text"
-              href="#">
+              @click.stop="openCourse(courseId, learningData.id)">
           </v-btn>
           <v-btn
+              v-else
               class="text-none"
               color="primary"
               text="Назначить"
@@ -52,14 +99,13 @@ import {computed, onMounted} from "vue";
       <v-divider></v-divider>
 
       <v-row>
-        <v-col>
-          <div>Дата назначения: {{courseData.startDate}}</div>
-          <div>Дата необходимого завершения: {{courseData.endDate}}</div>
-          <div>Максимальный балл: {{courseData.maxMark}}</div>
-          <div>Текущий балл: {{courseData.currentMark}}</div>
-          <div>Процент прохождения курса: {{courseData.progress}}</div>
-          <div>Длительность обучения в днях: {{courseData.days}}</div>
-
+        <v-col v-if="learningData">
+          <div>Дата назначения: {{learningData.start_usage_date}}</div>
+          <div>Дата необходимого завершения: {{learningData.max_end_date}}</div>
+          <div>Максимальный балл: {{learningData.max_score}}</div>
+          <div>Текущий балл: {{learningData.score}}</div>
+          <div>Процент прохождения курса: {{percent}}%</div>
+          <div>Длительность обучения в днях: {{getDuration(learningData.duration)}}</div>
         </v-col>
       </v-row>
     </v-col>

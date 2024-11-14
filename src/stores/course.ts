@@ -1,26 +1,27 @@
 import { ref, computed } from 'vue'
 import { defineStore } from 'pinia'
 import {useMyCoursesStore} from "@/stores/myCourses";
+import {useAllCoursesStore} from "@/stores/allCourses";
 
 const url = "http://localhost:80/oapi/courses/"
+const xAppIdHeader = "7091583612230139493";
 
 export const useCourseStore = defineStore('course', () => {
 
     const myCoursesStore = useMyCoursesStore();
-    const courseData = ref({
-        id: 1,
-        name: "Vue 3",
-        progress: 100,
-        status: "success",
-        desc:""
-    })
+    const allCoursesStore = useAllCoursesStore();
 
-    async function fetchCourse(id: number) {
-       courseData.value = myCoursesStore.findCourse(id);
+    const courseData = ref({});
+    const learningData = ref({});
+
+    async function findCourseData(id: number) {
+       courseData.value = await allCoursesStore.findCourse(id);
     }
-
-    async function assignCourse(id: number) {
-        await fetch(url + "assignCourse", {
+    async function findLearningData(id: number) {
+       learningData.value = await myCoursesStore.findCourse(id);
+    }
+    async function assignCourse(id: string) {
+        return  fetch(url + "assignCourse", {
             method: 'POST',
             headers: {
                 'Content-Type': 'application/json',
@@ -33,7 +34,28 @@ export const useCourseStore = defineStore('course', () => {
             .then((res) => res.json())
             .then((data) => {
                 console.log(data)
-                return data
+                if(data.message == "OK")
+                    return data.result.message;
+            })
+            .catch((err) => {
+                console.log(err)
+            })
+    }
+
+    async function fetchCourseUrl(courseId: string, learningId: string) {
+        let urlStr = `${url}getCourseUrl?course_id=${courseId}&learning_id=${learningId}`
+        return fetch(urlStr, {
+            method: 'GET',
+            headers: {
+                'Content-Type': 'application/json',
+                'x-app-id': xAppIdHeader,
+            },
+        })
+            .then((res) => res.text())
+            .then((data) => {
+                let url = "http://localhost:80/" + data;
+                console.log(url)
+                return url;
             })
             .catch((err) => {
                 console.log(err)
@@ -42,7 +64,12 @@ export const useCourseStore = defineStore('course', () => {
 
     return {
         courseData,
-        fetchCourse,
-        assignCourse
+        learningData,
+        findCourseData,
+        findLearningData,
+        assignCourse,
+        fetchCourseUrl,
+        myCoursesStore,
+        allCoursesStore
     }
 })
